@@ -1,0 +1,14 @@
+{
+  "name": "marketplace-backend",
+  "version": "1.0.0",
+  "description": "Premium Service Marketplace Backend",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

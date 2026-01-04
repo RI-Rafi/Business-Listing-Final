@@ -14,7 +14,7 @@ const listingSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      enum: ['Haircut', 'Laundry', 'Electronics', 'Fashion', 'Market'],
+      enum: ['Food', 'Cinema', 'Laundry', 'Haircut', 'Electronics', 'Fashion', 'Market'],
       required: [true, 'Category is required'],
     },
     location: {
@@ -53,6 +53,46 @@ const listingSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    externalBookingUrl: {
+      type: String,
+      trim: true,
+    },
+    popularity: {
+      type: Number,
+      default: 0,
+    },
+    rating: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 5,
+    },
+    reviewCount: {
+      type: Number,
+      default: 0,
+    },
+    deliveryPlatforms: [{
+      name: {
+        type: String,
+        enum: ['Foodpanda', 'Uber Eats', 'Pathao Food', 'Hungrynaki', 'Shohoz Food', 'Pathao'],
+      },
+      url: String,
+    }],
+    menuItems: [{
+      name: String,
+      description: String,
+      price: Number,
+      category: String, // e.g., "Main Course", "Beverages", "Desserts"
+      image: String,
+      available: { type: Boolean, default: true }
+    }],
+    services: [{
+      name: String,
+      description: String,
+      price: Number,
+      duration: String, // e.g., "30 minutes", "2 hours"
+      available: { type: Boolean, default: true }
+    }],
     isActive: {
       type: Boolean,
       default: true,

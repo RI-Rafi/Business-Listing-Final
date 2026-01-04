@@ -11,6 +11,10 @@ import listingRoutes from './routes/listing.routes.js';
 import userRoutes from './routes/user.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import metaRoutes from './routes/meta.routes.js';
+import cartRoutes from './routes/cart.routes.js';
+import chatRoutes from './routes/chat.routes.js';
+import marketplaceRoutes from './routes/marketplace.routes.js';
+import preferencesRoutes from './routes/preferences.routes.js';
 
 const app = express();
 
@@ -39,6 +43,10 @@ app.use('/api/listings', listingRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/meta', metaRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/marketplace', marketplaceRoutes);
+app.use('/api/preferences', preferencesRoutes); // ReX AI Memory System
 
 app.use((req, res) => {
   res.status(404).json({

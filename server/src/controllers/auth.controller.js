@@ -15,12 +15,18 @@ export const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   const { token, user } = await authService.loginUser(email, password);
 
+  // FIXED: Changed sameSite from 'strict' to 'lax'
+  // 'strict' was causing cookies to not be sent during navigation
+  // 'lax' allows cookies in same-site navigation while maintaining security
   res.cookie(config.cookieName, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: 'lax', // Changed from 'strict' to fix session persistence
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
+
+  console.log(`✅ User logged in: ${user.email} (ID: ${user._id})`);
+  console.log(`🍪 Cookie set: ${config.cookieName}`);
 
   res.json({
     success: true,

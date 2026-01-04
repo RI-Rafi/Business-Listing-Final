@@ -60,6 +60,12 @@ function Header() {
                 >
                   Profile
                 </Link>
+                <Link
+                  to="/cart"
+                  className="text-gray-700 hover:text-blue-600 font-medium"
+                >
+                  🛒 Cart
+                </Link>
                 <button
                   onClick={handleLogout}
                   className="px-4 py-2 text-gray-700 hover:text-blue-600 font-medium"

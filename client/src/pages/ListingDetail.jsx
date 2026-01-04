@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { listingAPI, userAPI } from '../lib/api';
+import toast from 'react-hot-toast';
+import { listingAPI, userAPI, cartAPI } from '../lib/api';
 import useAuthStore from '../state/authStore';
+import DeliveryModal from '../components/DeliveryModal';
+import OrderingFlow from '../components/OrderingFlow';
 
 function ListingDetail() {
   const { id } = useParams();
@@ -12,6 +15,17 @@ function ListingDetail() {
   const [error, setError] = useState(null);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [bookmarking, setBookmarking] = useState(false);
+  const [showDeliveryModal, setShowDeliveryModal] = useState(false);
+  const [showOrderingFlow, setShowOrderingFlow] = useState(false);
+
+  // Booking State
+  const [bookingData, setBookingData] = useState({
+    scheduledDate: '',
+    scheduledTime: '',
+    quantity: 1,
+    notes: ''
+  });
+  const [addingToCart, setAddingToCart] = useState(false);
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -41,8 +55,9 @@ function ListingDetail() {
       setBookmarking(true);
       const response = await userAPI.toggleBookmark(id);
       setIsBookmarked(response.data.bookmarked);
+      toast.success(response.data.bookmarked ? 'Bookmark added!' : 'Bookmark removed');
     } catch (err) {
-      alert('Failed to toggle bookmark: ' + err.message);
+      toast.error('Failed to toggle bookmark: ' + err.message);
     } finally {
       setBookmarking(false);
     }
@@ -55,9 +70,44 @@ function ListingDetail() {
 
     try {
       await listingAPI.deleteListing(id);
+      toast.success('Listing deleted successfully');
       navigate('/listings');
     } catch (err) {
-      alert('Failed to delete listing: ' + err.message);
+      toast.error('Failed to delete listing: ' + err.message);
+    }
+  };
+
+  const handleAddToCart = async (e) => {
+    e.preventDefault();
+    if (!user) {
+      toast.error('Please login to add items to cart');
+      navigate('/login');
+      return;
+    }
+
+    if (!bookingData.scheduledDate || !bookingData.scheduledTime) {
+      toast.error('Please select a date and time');
+      return;
+    }
+
+    try {
+      setAddingToCart(true);
+      await cartAPI.addToCart({
+        listingId: id,
+        serviceName: listing.name,
+        price: 50, // Default price
+        ...bookingData
+      });
+      toast.success('✅ Added to cart!');
+      // Wait a moment to show the toast before navigating
+      setTimeout(() => {
+        navigate('/cart');
+      }, 500);
+    } catch (err) {
+      toast.error('Failed to add to cart: ' + err.message);
+      console.error('Cart error:', err);
+    } finally {
+      setAddingToCart(false);
     }
   };
 
@@ -118,11 +168,10 @@ function ListingDetail() {
                 <button
                   onClick={handleBookmark}
                   disabled={bookmarking}
-                  className={`px-4 py-2 rounded-lg ${
-                    isBookmarked
-                      ? 'bg-yellow-500 text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
+                  className={`px-4 py-2 rounded-lg ${isBookmarked
+                    ? 'bg-yellow-500 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
                 >
                   {isBookmarked ? '★ Bookmarked' : '☆ Bookmark'}
                 </button>
@@ -133,18 +182,104 @@ function ListingDetail() {
               <p className="text-gray-700 whitespace-pre-line">{listing.description}</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-4">
               <div>
-                <h3 className="font-semibold text-gray-800 mb-1">Phone</h3>
-                <p className="text-gray-600">{listing.phone}</p>
+                <h3 className="font-semibold text-gray-800 mb-2 text-lg">Contact & Hours</h3>
+                <div className="space-y-2">
+                  <p className="text-gray-600"><span className="font-medium">Phone:</span> {listing.phone}</p>
+                  {listing.hours && (
+                    <div>
+                      <span className="font-medium text-gray-600">Hours:</span>
+                      <p className="text-gray-600 whitespace-pre-line">{listing.hours}</p>
+                    </div>
+                  )}
+                </div>
               </div>
-              {listing.hours && (
-                <div>
-                  <h3 className="font-semibold text-gray-800 mb-1">Hours</h3>
-                  <p className="text-gray-600 whitespace-pre-line">{listing.hours}</p>
+
+              {/* Booking Section - Only for non-owners */}
+              {!isOwner && (
+                <div className="bg-blue-50 p-6 rounded-xl border border-blue-100">
+                  <h3 className="font-bold text-gray-800 mb-4 text-lg">📅 Book Service</h3>
+                  <form onSubmit={handleAddToCart} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Date</label>
+                        <input
+                          type="date"
+                          required
+                          className="w-full px-3 py-2 border rounded-lg"
+                          value={bookingData.scheduledDate}
+                          onChange={e => setBookingData({ ...bookingData, scheduledDate: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Time</label>
+                        <input
+                          type="time"
+                          required
+                          className="w-full px-3 py-2 border rounded-lg"
+                          value={bookingData.scheduledTime}
+                          onChange={e => setBookingData({ ...bookingData, scheduledTime: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Quantity</label>
+                      <input
+                        type="number"
+                        min="1"
+                        className="w-full px-3 py-2 border rounded-lg"
+                        value={bookingData.quantity}
+                        onChange={e => setBookingData({ ...bookingData, quantity: e.target.value })}
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={addingToCart}
+                      className="w-full py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                    >
+                      {addingToCart ? 'Adding...' : 'Add to Cart 🛒'}
+                    </button>
+                  </form>
                 </div>
               )}
             </div>
+
+            {listing.deliveryPlatforms && listing.deliveryPlatforms.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-2">Available on:</h3>
+                <div className="flex flex-wrap gap-2">
+                  {listing.deliveryPlatforms.map((platform, idx) => (
+                    <span
+                      key={idx}
+                      className="px-4 py-2 bg-green-100 text-green-800 rounded-lg"
+                    >
+                      {platform.name}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Smart Ordering Button */}
+                <button
+                  onClick={() => setShowOrderingFlow(true)}
+                  className="mt-4 w-full px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-bold rounded-lg hover:from-green-700 hover:to-green-800 transition-all shadow-lg"
+                >
+                  🚗 Order for Delivery
+                </button>
+              </div>
+            )}
+
+            {/* For businesses without menu but want ordering (Electronics, etc.) */}
+            {!listing.deliveryPlatforms?.length && (listing.category === 'Electronics' || listing.category === 'Fashion') && (
+              <button
+                onClick={() => setShowOrderingFlow(true)}
+                className="mb-6 w-full px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-all"
+              >
+                📦 Order / Request Delivery
+              </button>
+            )}
 
             {(isOwner || isAdmin) && (
               <div className="flex gap-4 mt-6 pt-6 border-t">
@@ -165,9 +300,27 @@ function ListingDetail() {
           </div>
         </div>
       </div>
+
+      {/* Smart Ordering Flow Modal */}
+      {showOrderingFlow && listing && (
+        <OrderingFlow
+          business={listing}
+          onClose={() => setShowOrderingFlow(false)}
+        />
+      )}
+
+      {/* Delivery Modal */}
+      {showDeliveryModal && listing && (
+        <DeliveryModal
+          business={listing}
+          onClose={() => setShowDeliveryModal(false)}
+          onDeliverySelect={(platform) => {
+            console.log('Selected platform:', platform);
+          }}
+        />
+      )}
     </div>
   );
 }
 
 export default ListingDetail;
-

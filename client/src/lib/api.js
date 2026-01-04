@@ -54,5 +54,30 @@ export const metaAPI = {
   getLocations: () => api('/meta/locations'),
 };
 
+// NEW - Cart API
+export const cartAPI = {
+  getCart: () => api('/cart'),
+  addToCart: (data) => api('/cart/add', { method: 'POST', body: data }),
+  updateCartItem: (itemId, data) => api(`/cart/items/${itemId}`, { method: 'PUT', body: data }),
+  deleteCartItem: (itemId) => api(`/cart/items/${itemId}`, { method: 'DELETE' }),
+  checkout: () => api('/cart/checkout', { method: 'POST' }),
+};
+
+// Chat API
+export const chatAPI = {
+  chat: (data) => api('/chat', { method: 'POST', body: data }),
+  getChatHistory: (sessionId) => api(`/chat/history/${sessionId}`),
+};
+
+// Marketplace API
+export const marketplaceAPI = {
+  getByCategory: (category, params) => {
+    const query = new URLSearchParams(params).toString();
+    return api(`/marketplace/${category}?${query}`);
+  },
+  incrementView: (id) => api(`/marketplace/${id}/view`, { method: 'POST' }),
+};
+
 export default api;
+
 

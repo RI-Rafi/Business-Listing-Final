@@ -10,5 +10,7 @@ export const config = {
   cookieName: process.env.COOKIE_NAME || 'auth_token',
   corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5173',
   nodeEnv: process.env.NODE_ENV || 'development',
+  openaiApiKey: process.env.OPENAI_API_KEY,
+  groqApiKey: process.env.GROQ_API_KEY,
 };
 
