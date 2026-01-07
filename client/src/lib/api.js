@@ -78,6 +78,14 @@ export const marketplaceAPI = {
   incrementView: (id) => api(`/marketplace/${id}/view`, { method: 'POST' }),
 };
 
+// Map API
+export const mapAPI = {
+  getMapListings: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return api(`/listings/map?${query}`);
+  },
+};
+
 export default api;
 
 

@@ -8,7 +8,8 @@
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "seed": "node scripts/seed.js"
+    "seed": "node scripts/seed.js",
+    "backfill-geo": "node scripts/backfillBusinessGeo.js"
   },
   "keywords": [],
   "author": "",

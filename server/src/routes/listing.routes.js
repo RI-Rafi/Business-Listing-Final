@@ -7,6 +7,7 @@ import { listingWriteRateLimit } from '../middlewares/rateLimit.js';
 const router = express.Router();
 
 router.get('/', validate(schemas.getListings), listingController.getListings);
+router.get('/map', listingController.getMapListings);
 router.get('/my-listings', authenticate, listingController.getMyListings);
 router.get('/:id', listingController.getListing);
 router.post(

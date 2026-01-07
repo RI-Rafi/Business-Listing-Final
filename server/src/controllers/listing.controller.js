@@ -85,3 +85,22 @@ export const getMyListings = asyncHandler(async (req, res) => {
     data: { listings },
   });
 });
+
+export const getMapListings = asyncHandler(async (req, res) => {
+  const filters = {
+    category: req.query.category,
+    city: req.query.city,
+    area: req.query.area,
+    minPrice: req.query.minPrice,
+    maxPrice: req.query.maxPrice,
+  };
+
+  const sort = req.query.sort || 'rating';
+
+  const result = await listingService.getMapListings(filters, sort);
+
+  res.json({
+    success: true,
+    data: result,
+  });
+});

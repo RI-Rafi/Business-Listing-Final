@@ -17,7 +17,7 @@ function Login() {
 
     try {
       await login(email, password);
-      navigate('/');
+      navigate('/map');
     } catch (err) {
       setError(err.message);
     } finally {

@@ -93,6 +93,17 @@ const listingSchema = new mongoose.Schema(
       duration: String, // e.g., "30 minutes", "2 hours"
       available: { type: Boolean, default: true }
     }],
+    geo: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point',
+      },
+      coordinates: {
+        type: [Number], // [longitude, latitude]
+        default: undefined,
+      },
+    },
     isActive: {
       type: Boolean,
       default: true,
@@ -107,5 +118,6 @@ listingSchema.index({ name: 'text', description: 'text', shortDescription: 'text
 listingSchema.index({ category: 1, 'location.city': 1, 'location.area': 1 });
 listingSchema.index({ owner: 1 });
 listingSchema.index({ isActive: 1 });
+listingSchema.index({ geo: '2dsphere' });
 
 export default mongoose.model('Listing', listingSchema);

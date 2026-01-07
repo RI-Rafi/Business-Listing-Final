@@ -12,5 +12,6 @@ export const config = {
   nodeEnv: process.env.NODE_ENV || 'development',
   openaiApiKey: process.env.OPENAI_API_KEY,
   groqApiKey: process.env.GROQ_API_KEY,
+  geoapifyApiKey: process.env.GEOAPIFY_API_KEY,
 };
 
